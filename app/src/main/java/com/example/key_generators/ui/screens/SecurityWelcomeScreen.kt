@@ -1,115 +1,274 @@
 package com.example.key_generators.ui.screens
 
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.keyframes
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.random.Random
 
 @Composable
 fun SecurityWelcomeScreen(onAnimationComplete: () -> Unit) {
+    // Define dark theme colors
+    val darkBackground = Color(0xFF121212)
+    val accentGreen = Color(0xFF00FF41)
+    val accentBlue = Color(0xFF0077FF)
+    val darkBlue = Color(0xFF002244)
+
+    // Animation values
     val lockScale = remember { Animatable(1f) }
     val lockRotation = remember { Animatable(0f) }
+    val textAlpha = remember { Animatable(0f) }
+    val sliderPosition = remember { Animatable(0f) }
+    val matrixRain = remember { mutableStateListOf<MatrixRainDrop>() }
+    val scope = rememberCoroutineScope()
 
+    // Binary text animation
+    val binaryText = remember { mutableStateOf("") }
+    val binaryChars = listOf("0", "1")
+
+    // Create matrix rain effect
+    LaunchedEffect(Unit) {
+        repeat(50) {
+            val x = Random.nextFloat() * 1080
+            val y = Random.nextFloat() * 500 - 500
+            val speed = Random.nextFloat() * 5 + 2
+            val alpha = Random.nextFloat() * 0.6f + 0.2f
+            matrixRain.add(MatrixRainDrop(x, y, speed, alpha))
+        }
+
+        while (true) {
+            matrixRain.forEachIndexed { index, drop ->
+                matrixRain[index] = drop.copy(
+                    y = if (drop.y > 2000) Random.nextFloat() * 500 - 500 else drop.y + drop.speed,
+                    x = if (drop.y > 2000) Random.nextFloat() * 1080 else drop.x
+                )
+            }
+            delay(16)
+        }
+    }
+
+    // Binary text animation
+    LaunchedEffect(Unit) {
+        while (true) {
+            val text = StringBuilder()
+            repeat(20) {
+                text.append(binaryChars.random())
+            }
+            binaryText.value = text.toString()
+            delay(150)
+        }
+    }
+
+    // Main animations
     LaunchedEffect(Unit) {
         launch {
             lockScale.animateTo(
                 targetValue = 1.2f,
                 animationSpec = infiniteRepeatable(
                     animation = keyframes {
-                        durationMillis = 1000
-                        1f at 500
-                        1.2f at 1000
+                        durationMillis = 1500
+                        1f at 0
+                        1.1f at 750
+                        1f at 1500
                     },
-                    repeatMode = RepeatMode.Reverse
+                    repeatMode = RepeatMode.Restart
                 )
             )
         }
+
         launch {
             lockRotation.animateTo(
-                targetValue = 10f,
+                targetValue = 5f,
                 animationSpec = infiniteRepeatable(
                     animation = keyframes {
-                        durationMillis = 500
-                        0f at 250
-                        10f at 500
+                        durationMillis = 1000
+                        0f at 0
+                        5f at 500
+                        0f at 1000
                     },
-                    repeatMode = RepeatMode.Reverse
+                    repeatMode = RepeatMode.Restart
                 )
             )
         }
-        onAnimationComplete()
+
+        launch {
+            delay(500)
+            textAlpha.animateTo(1f, animationSpec = tween(1000))
+
+            delay(500)
+            sliderPosition.animateTo(1f, animationSpec = tween(1500))
+
+            delay(1000)
+            onAnimationComplete()
+        }
     }
 
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(darkBackground, Color(0xFF0A0A14)),
+                    startY = 0f,
+                    endY = Float.POSITIVE_INFINITY
+                )
+            ),
         contentAlignment = Alignment.Center
     ) {
+        // Matrix rain effect
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            matrixRain.forEach { drop ->
+                drawCircle(
+                    color = accentGreen.copy(alpha = drop.alpha),
+                    radius = 2f,
+                    center = Offset(drop.x, drop.y)
+                )
+            }
+        }
+
+        // Binary overlay effect
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .alpha(0.1f),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = binaryText.value,
+                style = MaterialTheme.typography.bodySmall,
+                color = accentGreen.copy(alpha = 0.5f),
+                modifier = Modifier.graphicsLayer {
+                    scaleX = 10f
+                    scaleY = 10f
+                }
+            )
+        }
+
+        // Main content
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.padding(16.dp)
         ) {
+            // Lock icon
             Canvas(
                 modifier = Modifier
-                    .size(200.dp)
+                    .size(150.dp)
                     .scale(lockScale.value)
                     .rotate(lockRotation.value)
             ) {
-
+                // Lock body
                 drawRect(
-                    color = Color.Blue.copy(alpha = 0.7f),
-                    style = Stroke(width = 10f),
+                    color = accentBlue.copy(alpha = 0.8f),
+                    style = Stroke(width = 8f),
                     topLeft = center.copy(x = center.x - 50f, y = center.y + 20f),
                     size = size.copy(width = 100f, height = 80f)
                 )
 
-
+                // Lock shackle
                 drawArc(
-                    color = Color.Blue.copy(alpha = 0.7f),
+                    color = accentBlue.copy(alpha = 0.8f),
                     startAngle = 0f,
                     sweepAngle = 180f,
                     useCenter = false,
-                    style = Stroke(width = 10f),
-                    topLeft = center.copy(x = center.x - 30f, y = center.y - 80f),
+                    style = Stroke(width = 8f),
+                    topLeft = center.copy(x = center.x - 30f, y = center.y - 50f),
                     size = size.copy(width = 60f, height = 60f)
                 )
 
+                // Lock keyhole
                 drawCircle(
-                    color = Color.Blue.copy(alpha = 0.7f),
+                    color = accentBlue.copy(alpha = 0.8f),
                     radius = 10f,
-                    center = center.copy(y = center.y + 50f),
+                    center = center.copy(y = center.y + 60f),
                     style = Fill
                 )
+
+                // Circuit lines
+                for (i in 0 until 8) {
+                    val startX = center.x - 120f + (i * 30)
+                    drawLine(
+                        color = accentGreen.copy(alpha = 0.6f),
+                        start = Offset(startX, center.y + 120f),
+                        end = Offset(startX + 15f, center.y + 140f),
+                        strokeWidth = 2f
+                    )
+                }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
+            // App title
             Text(
-                text = "Key Generators",
+                text = "KEY GENERATORS",
                 style = MaterialTheme.typography.headlineLarge,
-                color = MaterialTheme.colorScheme.primary
+                fontWeight = FontWeight.Bold,
+                color = Color.White,
+                modifier = Modifier.alpha(textAlpha.value)
             )
 
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Subtitle
             Text(
-                text = "Secure Your Data",
+                text = "SECURE YOUR DIGITAL FORTRESS",
                 style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.secondary
+                color = accentGreen,
+                modifier = Modifier.alpha(textAlpha.value)
             )
+
+            Spacer(modifier = Modifier.height(48.dp))
+
+            // Animated slider
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.8f)
+                    .height(60.dp)
+                    .background(
+                        color = darkBlue,
+                        shape = MaterialTheme.shapes.medium
+                    )
+                    .padding(4.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(sliderPosition.value)
+                        .fillMaxHeight()
+                        .background(
+                            Brush.horizontalGradient(
+                                listOf(accentGreen.copy(alpha = 0.3f), accentGreen)
+                            ),
+                            shape = MaterialTheme.shapes.medium
+                        )
+                )
+
+                Text(
+                    text = "Key Generators Loading...",
+                    color = Color.White,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
         }
     }
 }
+
+// Helper data class for matrix rain effect
+data class MatrixRainDrop(val x: Float, val y: Float, val speed: Float, val alpha: Float)
