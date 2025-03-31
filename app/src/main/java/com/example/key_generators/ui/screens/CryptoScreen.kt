@@ -43,7 +43,6 @@ fun CryptoScreen(
     var decryptedText by remember { mutableStateOf("") }
     val scrollState = rememberScrollState()
 
-    // Space theme colors
     val darkSpace = Color(0xFF050714)
     val deepBlue = Color(0xFF0A1128)
     val purpleNebula = Color(0xFF2E1065)
@@ -51,7 +50,6 @@ fun CryptoScreen(
     val starColor = Color(0xFFFFFFFF)
     val textFieldColor = Color(0xFF1A1C2A)
 
-    // Generate random stars
     val stars = remember {
         List(200) {
             Star(
@@ -64,7 +62,7 @@ fun CryptoScreen(
         }
     }
 
-    // Star animation
+
     val pulseAnimation = rememberInfiniteTransition()
     val pulseFactor = pulseAnimation.animateFloat(
         initialValue = 0.7f,
@@ -86,7 +84,7 @@ fun CryptoScreen(
                 )
             )
     ) {
-        // Star background
+
         Canvas(modifier = Modifier.fillMaxSize()) {
             stars.forEach { star ->
                 val starAlpha = star.alpha * pulseFactor.value
@@ -96,7 +94,6 @@ fun CryptoScreen(
                     center = Offset(star.x % size.width, star.y % size.height)
                 )
 
-                // Some stars with glow effect
                 if (star.size > 2f) {
                     drawCircle(
                         color = starColor.copy(alpha = starAlpha * 0.3f),
@@ -106,7 +103,6 @@ fun CryptoScreen(
                 }
             }
 
-            // Draw a few nebula-like fuzzy areas
             for (i in 0 until 5) {
                 val x = (Random.nextFloat() * size.width)
                 val y = (Random.nextFloat() * size.height)
@@ -118,7 +114,7 @@ fun CryptoScreen(
             }
         }
 
-        // Content
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -136,7 +132,6 @@ fun CryptoScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Encryption Section
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -254,7 +249,6 @@ fun CryptoScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Decryption Section
             Card(
                 modifier = Modifier
                     .fillMaxWidth()

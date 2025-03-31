@@ -25,13 +25,12 @@ import kotlin.random.Random
 
 @Composable
 fun SecurityWelcomeScreen(onAnimationComplete: () -> Unit) {
-    // Define dark theme colors
+
     val darkBackground = Color(0xFF121212)
     val accentGreen = Color(0xFF00FF41)
     val accentBlue = Color(0xFF0077FF)
     val darkBlue = Color(0xFF002244)
 
-    // Animation values
     val lockScale = remember { Animatable(1f) }
     val lockRotation = remember { Animatable(0f) }
     val textAlpha = remember { Animatable(0f) }
@@ -39,11 +38,10 @@ fun SecurityWelcomeScreen(onAnimationComplete: () -> Unit) {
     val matrixRain = remember { mutableStateListOf<MatrixRainDrop>() }
     val scope = rememberCoroutineScope()
 
-    // Binary text animation
+
     val binaryText = remember { mutableStateOf("") }
     val binaryChars = listOf("0", "1")
 
-    // Create matrix rain effect
     LaunchedEffect(Unit) {
         repeat(50) {
             val x = Random.nextFloat() * 1080
@@ -64,7 +62,6 @@ fun SecurityWelcomeScreen(onAnimationComplete: () -> Unit) {
         }
     }
 
-    // Binary text animation
     LaunchedEffect(Unit) {
         while (true) {
             val text = StringBuilder()
@@ -76,7 +73,6 @@ fun SecurityWelcomeScreen(onAnimationComplete: () -> Unit) {
         }
     }
 
-    // Main animations
     LaunchedEffect(Unit) {
         launch {
             lockScale.animateTo(
@@ -143,7 +139,6 @@ fun SecurityWelcomeScreen(onAnimationComplete: () -> Unit) {
             }
         }
 
-        // Binary overlay effect
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -161,20 +156,20 @@ fun SecurityWelcomeScreen(onAnimationComplete: () -> Unit) {
             )
         }
 
-        // Main content
+
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
             modifier = Modifier.padding(16.dp)
         ) {
-            // Lock icon
+
             Canvas(
                 modifier = Modifier
                     .size(150.dp)
                     .scale(lockScale.value)
                     .rotate(lockRotation.value)
             ) {
-                // Lock body
+
                 drawRect(
                     color = accentBlue.copy(alpha = 0.8f),
                     style = Stroke(width = 8f),
@@ -182,7 +177,7 @@ fun SecurityWelcomeScreen(onAnimationComplete: () -> Unit) {
                     size = size.copy(width = 100f, height = 80f)
                 )
 
-                // Lock shackle
+
                 drawArc(
                     color = accentBlue.copy(alpha = 0.8f),
                     startAngle = 0f,
@@ -193,7 +188,6 @@ fun SecurityWelcomeScreen(onAnimationComplete: () -> Unit) {
                     size = size.copy(width = 60f, height = 60f)
                 )
 
-                // Lock keyhole
                 drawCircle(
                     color = accentBlue.copy(alpha = 0.8f),
                     radius = 10f,
@@ -201,7 +195,7 @@ fun SecurityWelcomeScreen(onAnimationComplete: () -> Unit) {
                     style = Fill
                 )
 
-                // Circuit lines
+
                 for (i in 0 until 8) {
                     val startX = center.x - 120f + (i * 30)
                     drawLine(
@@ -215,7 +209,6 @@ fun SecurityWelcomeScreen(onAnimationComplete: () -> Unit) {
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // App title
             Text(
                 text = "KEY GENERATORS",
                 style = MaterialTheme.typography.headlineLarge,
@@ -226,7 +219,6 @@ fun SecurityWelcomeScreen(onAnimationComplete: () -> Unit) {
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Subtitle
             Text(
                 text = "SECURE YOUR DIGITAL FORTRESS",
                 style = MaterialTheme.typography.bodyLarge,
@@ -236,7 +228,6 @@ fun SecurityWelcomeScreen(onAnimationComplete: () -> Unit) {
 
             Spacer(modifier = Modifier.height(48.dp))
 
-            // Animated slider
             Box(
                 modifier = Modifier
                     .fillMaxWidth(0.8f)
@@ -270,5 +261,4 @@ fun SecurityWelcomeScreen(onAnimationComplete: () -> Unit) {
     }
 }
 
-// Helper data class for matrix rain effect
 data class MatrixRainDrop(val x: Float, val y: Float, val speed: Float, val alpha: Float)
